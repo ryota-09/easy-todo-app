@@ -5,6 +5,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import EmailIcon from '@mui/icons-material/Email';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import { registerUser } from '../../lib/fetch';
 
 const RegisterPage: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -12,11 +13,19 @@ const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ここでユーザー登録処理を実装
-    console.log('Register:', userName, email, password);
-    navigate('/login');
+    const targetUser = {
+      userName: userName,
+      email: email,
+      password: password
+    }
+    try {
+      await registerUser(targetUser);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error:', error)
+    }
   };
 
   return (
