@@ -1,34 +1,54 @@
 import React, { useState } from 'react';
-import { Container, Typography, TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Box, Tabs, Tab } from '@mui/material';
+import { Container, Typography, TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate } from 'react-router-dom';
+import Navigation from '../Navigation';
 
 interface Task {
   id: string;
+  userId: string;
   title: string;
+  description: string;
   completed: boolean;
+  dueDate: string;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const TaskListPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState('');
   const [tabValue, setTabValue] = useState(0);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newTask, setNewTask] = useState<Omit<Task, 'id' | 'userId' | 'completed' | 'createdAt' | 'updatedAt'>>({
+    title: '',
+    description: '',
+    dueDate: new Date().toISOString().split('T')[0],
+    priority: 1,
+  });
   const navigate = useNavigate();
 
   const handleAddTask = () => {
-    if (newTask.trim() !== '') {
-      const task: Task = {
-        id: Date.now().toString(),
-        title: newTask,
-        completed: false,
-      };
-      setTasks([...tasks, task]);
-      setNewTask('');
-    }
+    const task: Task = {
+      id: Date.now().toString(),
+      userId: '4fa44ee5-1274-4a5f-afc1-ad1d5253c792', // 仮のユーザーID
+      ...newTask,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setTasks([...tasks, task]);
+    setOpenDialog(false);
+    setNewTask({
+      title: '',
+      description: '',
+      dueDate: new Date().toISOString().split('T')[0],
+      priority: 1,
+    });
   };
 
   const handleToggleComplete = (id: string) => {
@@ -48,26 +68,20 @@ const TaskListPage: React.FC = () => {
   const filteredTasks = tabValue === 0 ? tasks.filter(task => !task.completed) : tasks.filter(task => task.completed);
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
+      <Navigation />
       <Typography variant="h4" component="h1" gutterBottom sx={{ mt: 4, color: '#1A3636' }}>
         <AssignmentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
         タスク一覧
       </Typography>
-      <Box sx={{ display: 'flex', mb: 2 }}>
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="新しいタスクを入力"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          InputProps={{
-            startAdornment: <AddTaskIcon sx={{ color: '#677D6A', mr: 1 }} />,
-          }}
-        />
-        <Button variant="contained" onClick={handleAddTask} sx={{ ml: 1, bgcolor: '#677D6A' }}>
-          追加
-        </Button>
-      </Box>
+      <Button
+        variant="contained"
+        startIcon={<AddTaskIcon />}
+        onClick={() => setOpenDialog(true)}
+        sx={{ mb: 2, bgcolor: '#677D6A' }}
+      >
+        新しいタスク
+      </Button>
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab label="未完了" icon={<AssignmentIcon />} iconPosition="start" />
         <Tab label="完了" icon={<CheckCircleIcon />} iconPosition="start" />
@@ -75,7 +89,10 @@ const TaskListPage: React.FC = () => {
       <List>
         {filteredTasks.map((task) => (
           <ListItem key={task.id} sx={{ bgcolor: '#D6BD98', mb: 1, borderRadius: 1 }}>
-            <ListItemText primary={task.title} />
+            <ListItemText 
+              primary={task.title}
+              secondary={`期限: ${new Date(task.dueDate).toLocaleDateString()} | 優先度: ${task.priority}`}
+            />
             <ListItemSecondaryAction>
               <IconButton edge="end" aria-label="complete" onClick={() => handleToggleComplete(task.id)}>
                 <CheckCircleIcon color={task.completed ? 'primary' : 'action'} />
@@ -90,6 +107,66 @@ const TaskListPage: React.FC = () => {
           </ListItem>
         ))}
       </List>
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>新しいタスクを追加</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="title"
+            label="タイトル"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newTask.title}
+            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            id="description"
+            label="説明"
+            type="text"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={4}
+            value={newTask.description}
+            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+          />
+          <TextField
+            margin="dense"
+            id="dueDate"
+            label="期限"
+            type="date"
+            fullWidth
+            variant="outlined"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={newTask.dueDate}
+            onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+          />
+          <FormControl fullWidth margin="dense">
+            <InputLabel id="priority-label">優先度</InputLabel>
+            <Select
+              labelId="priority-label"
+              id="priority"
+              value={newTask.priority}
+              label="優先度"
+              onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as number })}
+            >
+              <MenuItem value={1}>低</MenuItem>
+              <MenuItem value={2}>中</MenuItem>
+              <MenuItem value={3}>高</MenuItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>キャンセル</Button>
+          <Button onClick={handleAddTask}>追加</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
