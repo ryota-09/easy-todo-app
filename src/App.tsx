@@ -5,6 +5,7 @@ import RegisterPage from "./components/page/RegisterPage";
 import TaskListPage from "./components/page/TaskListPage";
 import TaskDetailPage from "./components/page/TaskDetailPage";
 import ProfilePage from "./components/page/ProfilePage";
+import { GlobalProvider } from "./provider";
 
 const theme = createTheme({
   palette: {
@@ -23,17 +24,19 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/tasks" element={<TaskListPage />} />
-          <Route path="/tasks/:id" element={<TaskDetailPage />} />
-          <Route path="/" element={<LoginPage />} />
-        </Routes>
-      </Router>
+      <GlobalProvider>
+        <CssBaseline />
+        <Router>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/tasks" element={<TaskListPage />} />
+            <Route path="/tasks/:id" element={<TaskDetailPage />} />
+            <Route path="/" element={<LoginPage />} />
+          </Routes>
+        </Router>
+      </GlobalProvider>
     </ThemeProvider>
   )
 }

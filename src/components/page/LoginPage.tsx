@@ -4,17 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import EmailIcon from '@mui/icons-material/Email';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import { loginUser } from '../../lib/fetch';
+import { useGlobalState } from '../../provider';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { dispatch } = useGlobalState();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ここでログイン処理を実装
-    console.log('Login:', email, password);
-    navigate('/tasks');
+    const targetLoginUser = {
+      email: email,
+      password: password,
+    }
+    try {
+      const data = await loginUser(targetLoginUser);
+      dispatch({ type: 'setUser', payload: data });
+      navigate('/tasks');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
