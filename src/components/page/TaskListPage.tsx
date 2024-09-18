@@ -83,7 +83,7 @@ const TaskListPage: React.FC = () => {
               <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteTask(task.id)}>
                 <DeleteIcon />
               </IconButton>
-              <IconButton edge="end" aria-label="details" onClick={() => navigate(`/task/${task.id}`)}>
+              <IconButton edge="end" aria-label="details" onClick={() => navigate(`/tasks/${task.id}`)}>
                 <InfoIcon />
               </IconButton>
             </ListItemSecondaryAction>
