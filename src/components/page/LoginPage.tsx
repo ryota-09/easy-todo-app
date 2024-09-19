@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
       password: password,
     }
     try {
-      const data = await loginUser(targetLoginUser);
+      const { data } = await loginUser(targetLoginUser);
       dispatch({ type: 'setUser', payload: data });
       navigate('/tasks');
     } catch (error) {

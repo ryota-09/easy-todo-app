@@ -15,6 +15,12 @@ export type LoginUser = {
   password: string;
 }
 
+export type EditUser = {
+  id: string
+  userName: string;
+  email: string;
+}
+
 export type Task = {
   id: string;
   userId: string;

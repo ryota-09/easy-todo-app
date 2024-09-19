@@ -1,37 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Typography, Paper, Box, TextField, Button, Avatar } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import Navigation from '../Navigation';
-
-interface User {
-  id: string;
-  userName: string;
-  email: string;
-}
+import { useGlobalState } from '../../provider';
+import type { User } from '../../types';
+import { updateUser } from '../../lib/fetch';
 
 const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [user, setUser] = useState<User>({
-    id: "4fa44ee5-1274-4a5f-afc1-ad1d5253c792",
-    userName: "田中太郎",
-    email: "taro.tanaka@example.com"
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const { state, dispatch } = useGlobalState();
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!user) return
+    const targetUser = {
+      id: user.id,
+      userName: user.userName,
+      email: user.email,
+    }
+    await updateUser(targetUser);
+    dispatch({ type: 'setUser', payload: targetUser });
+    setUser(targetUser);
     setIsEditing(false);
-    // ここでユーザー情報の更新処理を実装
-    console.log('Updated user:', user);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+    setUser(user ? { ...user, [e.target.name]: e.target.value } : null);
   };
+
+  useEffect(() => {
+    setUser(state.user);
+  }, []);
+
+  if (!user) {
+    return (
+      <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
+        <Navigation />
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mt: 4, color: '#1A3636' }}>
+          <PersonIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+          プロフィール
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          ログインしてください
+        </Typography>
+        <Button variant="contained" color="primary" href="/login">
+          ログイン
+        </Button>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
