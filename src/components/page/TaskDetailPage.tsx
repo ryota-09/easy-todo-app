@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography, Paper, Box, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -11,34 +11,14 @@ import UpdateIcon from '@mui/icons-material/Update';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import Navigation from '../Navigation';
-
-interface Task {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  dueDate: string;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { fetchTaskDetail } from '../../lib/fetch';
+import type { Task } from '../../types';
 
 const TaskDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const [task, setTask] = useState<Task>({
-    id: "1d5af5ed-a1ff-4e84-9cdf-913f59f98f28",
-    userId: "4fa44ee5-1274-4a5f-afc1-ad1d5253c792",
-    title: "マーケティングデータを分析する",
-    description: "月次レポート用のデータ分析",
-    completed: false,
-    dueDate: "2024-09-20",
-    priority: 2,
-    createdAt: "2024-09-16 02:48:29.610738+00",
-    updatedAt: "2024-09-16 02:48:29.610738+00"
-  });
+  const [task, setTask] = useState<Task | null>(null);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -51,8 +31,35 @@ const TaskDetailPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setTask({ ...task, [e.target.name]: e.target.value });
+    setTask(task ? { ...task, [e.target.name]: e.target.value } : null);
   };
+
+  useEffect(() => {
+    const getTaskDetail = async () => {
+      try {
+        const { data } = await fetchTaskDetail(id ?? "");
+        setTask(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getTaskDetail();
+  }, []);
+
+  if (!task) {
+    return (
+      <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
+        <Navigation />
+        <Typography variant="h4" component="h1" gutterBottom sx={{ mt: 4, color: '#1A3636' }}>
+          <AssignmentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+          タスク詳細
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          ローディング中...
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
