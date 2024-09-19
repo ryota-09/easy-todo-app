@@ -7,8 +7,8 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../Navigation';
-import { fetchTasks } from '../../lib/fetch';
-import type { Task } from '../../types';
+import { fetchTasks, postNewTask } from '../../lib/fetch';
+import type { NewTask, Task } from '../../types';
 
 const TaskListPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -22,16 +22,15 @@ const TaskListPage: React.FC = () => {
   });
   const navigate = useNavigate();
 
-  const handleAddTask = () => {
-    const task: Task = {
-      id: Date.now().toString(),
-      userId: '4fa44ee5-1274-4a5f-afc1-ad1d5253c792', // 仮のユーザーID
-      ...newTask,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setTasks([...tasks, task]);
+  const handleAddTask = async () => {
+    const targetTask: NewTask = {
+      userId: '00a717b2-3e60-47be-9ea1-7797fb158efc',
+      title: newTask.title,
+      description: newTask.description,
+      dueDate: newTask.dueDate,
+      priority: newTask.priority,
+    }
+    await postNewTask(targetTask);
     setOpenDialog(false);
     setNewTask({
       title: '',
@@ -91,7 +90,7 @@ const TaskListPage: React.FC = () => {
       <List>
         {tasks.map((task) => (
           <ListItem key={task.id} sx={{ bgcolor: '#D6BD98', mb: 1, borderRadius: 1 }}>
-            <ListItemText 
+            <ListItemText
               primary={task.title}
               secondary={`期限: ${new Date(task.dueDate).toLocaleDateString()} | 優先度: ${task.priority}`}
             />

@@ -26,3 +26,11 @@ export type Task = {
   createdAt: string;
   updatedAt: string;
 }
+
+export type NewTask = {
+  userId: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  priority: number;
+}
