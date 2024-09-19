@@ -1,5 +1,5 @@
 import { API_KEY, API_URL } from "../config";
-import type { LoginUser, RegisterUser } from "../types";
+import type { LoginUser, RegisterUser, Task } from "../types";
 
 export const registerUser = async (data: RegisterUser) => {
   const res = await fetch(`${API_URL}/users`, {
@@ -23,6 +23,18 @@ export const loginUser = async (data: LoginUser) => {
       "X-API-KEY": API_KEY,
     },
     body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export const fetchTasks = async () => {
+  const res = await fetch(`${API_URL}/tasks`, {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-API-KEY": API_KEY
+    },
   });
   return res.json();
 }

@@ -14,3 +14,15 @@ export type LoginUser = {
   email: string;
   password: string;
 }
+
+export type Task = {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  dueDate: string;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}

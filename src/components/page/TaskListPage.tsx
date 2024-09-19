@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Typography, TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Box, Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -7,18 +7,8 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../Navigation';
-
-interface Task {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  dueDate: string;
-  priority: number;
-  createdAt: string;
-  updatedAt: string;
-}
+import { fetchTasks } from '../../lib/fetch';
+import type { Task } from '../../types';
 
 const TaskListPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -65,10 +55,22 @@ const TaskListPage: React.FC = () => {
     setTabValue(newValue);
   };
 
-  const filteredTasks = tabValue === 0 ? tasks.filter(task => !task.completed) : tasks.filter(task => task.completed);
+  useEffect(() => {
+    const getTasks = async () => {
+      try {
+        const { data } = await fetchTasks();
+        const filteredTasks = tabValue === 0 ? data.filter(task => !task.completed) : data.filter(task => task.completed);
+        setTasks(filteredTasks);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getTasks();
+  }, [tabValue]);
+
 
   return (
-    <Container maxWidth="sm" sx={{ bgcolor: "white", height: "100vh" }}>
+    <Container maxWidth="sm" sx={{ bgcolor: "white", height: "auto" }}>
       <Navigation />
       <Typography variant="h4" component="h1" gutterBottom sx={{ mt: 4, color: '#1A3636' }}>
         <AssignmentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
@@ -87,7 +89,7 @@ const TaskListPage: React.FC = () => {
         <Tab label="完了" icon={<CheckCircleIcon />} iconPosition="start" />
       </Tabs>
       <List>
-        {filteredTasks.map((task) => (
+        {tasks.map((task) => (
           <ListItem key={task.id} sx={{ bgcolor: '#D6BD98', mb: 1, borderRadius: 1 }}>
             <ListItemText 
               primary={task.title}
