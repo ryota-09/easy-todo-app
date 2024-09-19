@@ -7,8 +7,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import InfoIcon from '@mui/icons-material/Info';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../Navigation';
-import { fetchTasks, postNewTask } from '../../lib/fetch';
+import { deleteTask, fetchTasks, postNewTask, updateTask } from '../../lib/fetch';
 import type { NewTask, Task } from '../../types';
+import { useGlobalState } from '../../provider';
 
 const TaskListPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -20,11 +21,12 @@ const TaskListPage: React.FC = () => {
     dueDate: new Date().toISOString().split('T')[0],
     priority: 1,
   });
+  const { state } = useGlobalState();
   const navigate = useNavigate();
 
   const handleAddTask = async () => {
     const targetTask: NewTask = {
-      userId: '00a717b2-3e60-47be-9ea1-7797fb158efc',
+      userId: state.user?.id ?? '',
       title: newTask.title,
       description: newTask.description,
       dueDate: newTask.dueDate,
@@ -40,17 +42,21 @@ const TaskListPage: React.FC = () => {
     });
   };
 
-  const handleToggleComplete = (id: string) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ));
+  const handleToggleComplete = async (task: Task) => {
+    const targetTask = {
+      ...task,
+      completed: !task.completed,
+    }
+    await updateTask(targetTask);
+    setTasks(tasks.filter(task => task.id !== targetTask.id));
   };
 
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
+    await deleteTask(id);
     setTasks(tasks.filter(task => task.id !== id));
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -95,7 +101,7 @@ const TaskListPage: React.FC = () => {
               secondary={`期限: ${new Date(task.dueDate).toLocaleDateString()} | 優先度: ${task.priority}`}
             />
             <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="complete" onClick={() => handleToggleComplete(task.id)}>
+              <IconButton edge="end" aria-label="complete" onClick={() => handleToggleComplete(task)}>
                 <CheckCircleIcon color={task.completed ? 'primary' : 'action'} />
               </IconButton>
               <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteTask(task.id)}>

@@ -40,3 +40,13 @@ export type NewTask = {
   dueDate: string;
   priority: number;
 }
+
+export type UpdateTask = {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  dueDate: string;
+  priority: number;
+}

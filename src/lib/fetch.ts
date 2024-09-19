@@ -1,5 +1,5 @@
 import { API_KEY, API_URL } from "../config";
-import type { EditUser, LoginUser, NewTask, RegisterUser } from "../types";
+import type { EditUser, LoginUser, NewTask, RegisterUser, Task, UpdateTask } from "../types";
 
 export const registerUser = async (data: RegisterUser) => {
   const res = await fetch(`${API_URL}/users`, {
@@ -73,6 +73,31 @@ export const updateUser = async (data: EditUser) => {
       "X-API-KEY": API_KEY,
     },
     body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export const updateTask = async (data: UpdateTask) => {
+  const res = await fetch(`${API_URL}/tasks/${data.id}`, {
+    method: 'PATCH',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-API-KEY": API_KEY,
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export const deleteTask = async (id: string) => {
+  const res = await fetch(`${API_URL}/tasks/${id}`, {
+    method: 'DELETE',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-API-KEY": API_KEY,
+    },
   });
   return res.json();
 }

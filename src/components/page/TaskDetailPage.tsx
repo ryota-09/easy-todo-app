@@ -11,23 +11,35 @@ import UpdateIcon from '@mui/icons-material/Update';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import Navigation from '../Navigation';
-import { fetchTaskDetail } from '../../lib/fetch';
+import { fetchTaskDetail, updateTask } from '../../lib/fetch';
 import type { Task } from '../../types';
+import { useGlobalState } from '../../provider';
 
 const TaskDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [task, setTask] = useState<Task | null>(null);
+  const { state } = useGlobalState();
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!task) return
+    const targetTask = {
+      id: task.id,
+      userId: state.user?.id ?? '',
+      title: task.title,
+      description: task.description,
+      dueDate: task.dueDate,
+      priority: task.priority,
+      completed: task.completed,
+    }
+    await updateTask(targetTask);
+    setTask({ ...targetTask, createdAt: task.createdAt, updatedAt: new Date().toISOString() });
     setIsEditing(false);
-    // ここでタスクの更新処理を実装
-    console.log('Updated task:', task);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
